@@ -13,9 +13,14 @@ stocks = [
 # Function to fetch stock data
 def fetch_stock_data(stock):
     print(f"Fetching data for {stock}...")
-    # Fetch historical data for one year
-    data = yf.download(stock, period='1y')
-    return data
+    # Fetch historical data for #TODO time
+    data = yf.download(stock, period = '1y')
+    # Transform data so it fits in database
+    df = data.reset_index()
+    df.columns = [col[0] if col[0] == 'Date' else col[1] for col in df.columns]
+    df.insert(1, 'Ticker', stock)
+    df.columns = ['Date', 'Ticker', 'Adj Close', 'Close', 'High', 'Low', 'Open', 'Volume']
+    return df
 
 # Function to save data to the SQLite database
 def save_to_database(stock_data):
@@ -37,12 +42,10 @@ def save_to_database(stock_data):
     ''')
 
     # Insert data into the database
-    for date, row in stock_data.iterrows():
-        c.execute('''
-            INSERT OR REPLACE INTO stock_prices (stock, date, open, high, low, close, volume)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (stock_data.name, date.date(), row['Open'], row['High'], row['Low'], row['Close'], row['Volume']))
-
+    for index, row in stock_data.iterrows():
+        c.execute('''INSERT OR REPLACE INTO stock_prices (stock, date, open, high, low, close, volume)
+                VALUES (?, ?, ?, ?, ?, ?, ?)''', 
+                (row['Ticker'], row['Date'].date(), row['Open'], row['High'], row['Low'], row['Close'], row['Volume']))
     conn.commit()
     conn.close()
 
