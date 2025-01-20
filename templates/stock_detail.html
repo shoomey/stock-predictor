@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ stock_name }} - Stock Details</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>Details for {{ stock_name }}</h1>
+
+    <h2>Historical Prices</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Open</th>
+                <th>High</th>
+                <th>Low</th>
+                <th>Close</th>
+                <th>Volume</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in stock_data %}
+                <tr>
+                    <td>{{ row['date'] }}</td>
+                    <td>${{ '%.2f' | format(row['open']) }}</td>
+                    <td>${{ '%.2f' | format(row['high']) }}</td>
+                    <td>${{ '%.2f' | format(row['low']) }}</td>
+                    <td>${{ '%.2f' | format(row['close']) }}</td>
+                    <td>{{ row['volume'] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Future Price Predictions</h2>
+    {% if future_dates and future_prices %}
+        <ul class="list-group">
+            {% for date, price in zip(future_dates, future_prices) %}
+                <li class="list-group-item">
+                    Date: {{ date.strftime('%Y-%m-%d') }} - Predicted Price: ${{ '%.2f' | format(price) }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No predictions available.</p>
+    {% endif %}
+
+    <!-- Back to Home Button -->
+    <a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">Back to Home</a>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
